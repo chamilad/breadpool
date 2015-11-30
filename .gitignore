@@ -1,0 +1,14 @@
+# Eclipse Project Files
+.project
+.classpath
+.settings/
+
+# IntelliJ IDEA Project Files
+.idea/
+.cache/
+*.iml
+*.ipr
+*.iws
+
+#python bytecode
+*.pyc
