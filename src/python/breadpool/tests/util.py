@@ -12,4 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__author__ = 'chamilad'
+import threading
+from ..pool import *
+
+
+def get_threads_with_name(thread_name):
+    live_threads = threading.enumerate()
+    named_threads = {}
+    for live_thread in live_threads:
+        if thread_name in live_thread.name:
+            named_threads[live_thread.name] = live_thread
+
+    return named_threads
+
+
+class TestTask(AbstractRunnable):
+    def execute(self):
+        self.task(self.args)
+
+    def __init__(self, task, *args):
+        self.args = args
+        self.task = task
