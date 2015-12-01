@@ -28,6 +28,7 @@ def get_threads_with_name(thread_name):
 
 class TestTask(AbstractRunnable):
     def execute(self):
+        print "Args %s" % self.args
         self.task(self.args)
 
     def __init__(self, task, *args):

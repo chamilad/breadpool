@@ -71,7 +71,6 @@ def test_thread_pool_daemon_flag():
 
 
 def test_thread_pool_thread_limitation():
-    global counter_queue
     thread_pool = ThreadPool(5, "TestThreadPoolLimitation", polling_timeout=1)
     i = 0
     counter_queue = Queue()
@@ -82,3 +81,13 @@ def test_thread_pool_thread_limitation():
     assert len(util.get_threads_with_name("TestThreadPoolLimitation")) == 5
     thread_pool.terminate()
     assert counter_queue.qsize() == 10
+
+
+def test_scheduled_executor_scheduling():
+    thread_pool = ThreadPool(3, "TestScheduledExcutorScheduling", polling_timeout=1)
+    counter_queue = Queue()
+    scheduled_executor = ScheduledJobExecutor(util.TestTask(lambda(l): counter_queue.put(l), "STest %s" % datetime.datetime.now()), thread_pool, 5)
+    scheduled_executor.start()
+    time.sleep(27)
+    scheduled_executor.terminate()
+    assert counter_queue.qsize() == 5

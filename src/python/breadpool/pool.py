@@ -13,17 +13,18 @@
 # limitations under the License.
 
 from Queue import Queue, Empty
-from threading import Thread
+from threading import Thread, RLock as rLock
 import traceback
 import logging
+import time
 
 log = logging.getLogger(__name__)
 log.addHandler(logging.NullHandler)
 
 
-class WorkerThread(Thread):
+class _WorkerThread(Thread):
     def __init__(self, task_queue, thread_name, polling_timeout):
-        super(WorkerThread, self).__init__(name=thread_name)
+        super(_WorkerThread, self).__init__(name=thread_name)
         self.__task_queue = task_queue
         """ :type : Queue """
         self.__terminated = False
@@ -92,7 +93,7 @@ class ThreadPool(object):
     def create_worker_threads(self):
         while len(self.__worker_threads) < self.__pool_size:
             thread_name = "%s-%s" % (self.__pool_name, (len(self.__worker_threads) + 1))
-            worker_thread = WorkerThread(self.__task_queue, thread_name, self.__polling_timeout)
+            worker_thread = _WorkerThread(self.__task_queue, thread_name, self.__polling_timeout)
             worker_thread.setDaemon(self.__daemon)
             worker_thread.start()
             self.__worker_threads.append(worker_thread)
@@ -111,10 +112,16 @@ class ScheduledJobExecutor(Thread):
 
     def run(self):
         # start job
-        raise NotImplementedError
+        while not self.__terminated:
+            with rLock():
+                time.sleep(self.__delay)
+                if not self.__terminated:
+                    self.__thread_pool.enqueue(self.__task)
 
     def terminate(self):
-        self.__terminated = True
+        with rLock():
+            self.__terminated = True
+            self.__thread_pool.terminate()
 
 
 class AbstractRunnable(object):
