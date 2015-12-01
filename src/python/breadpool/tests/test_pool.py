@@ -42,23 +42,23 @@ def test_thread_pool_pool_thread_size():
     thread_pool.terminate()
 
 
-def test_thread_pool_polling_timeout():
-    thread_pool = ThreadPool(5, "TestThreadPoolPolling", polling_timeout=5)
-    while len(util.get_threads_with_name("TestThreadPoolPolling").keys()) < 5:
-        time.sleep(1)
-
-    before_time = datetime.datetime.now()
-    print before_time.time()
-    thread_pool.terminate()
-    while len(util.get_threads_with_name("TestThreadPoolPolling").keys()) > 4:
-        time.sleep(1)
-
-    after_time = datetime.datetime.now()
-    print after_time.time()
-    diff_time = after_time - before_time
-    print diff_time.seconds
-    # assert False
-    assert diff_time.seconds == 5
+# def test_thread_pool_polling_timeout():
+#     thread_pool = ThreadPool(5, "TestThreadPoolPolling", polling_timeout=5)
+#     while len(util.get_threads_with_name("TestThreadPoolPolling").keys()) < 5:
+#         time.sleep(1)
+#
+#     before_time = datetime.datetime.now()
+#     print before_time.time()
+#     thread_pool.terminate()
+#     while len(util.get_threads_with_name("TestThreadPoolPolling").keys()) > 4:
+#         time.sleep(1)
+#
+#     after_time = datetime.datetime.now()
+#     print after_time.time()
+#     diff_time = after_time - before_time
+#     print diff_time.seconds
+#     # assert False
+#     assert diff_time.seconds == 5
 
 
 def test_thread_pool_daemon_flag():
