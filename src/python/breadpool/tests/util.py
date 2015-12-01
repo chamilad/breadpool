@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import threading
-from ..pool import *
+from breadpool.pool import *
 
 
 def get_threads_with_name(thread_name):

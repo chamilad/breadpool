@@ -15,7 +15,7 @@
 import pytest
 import datetime
 import time
-from ..pool import *
+from breadpool.pool import *
 import util
 
 """
