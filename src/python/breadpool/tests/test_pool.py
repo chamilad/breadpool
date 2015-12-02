@@ -119,3 +119,22 @@ def test_worker_thread_task_execution_exception_handling(lg):
         'Caught exception while executing task : ValueError: Some Exception Exception caught'),)
 
     thread_pool.terminate()
+
+
+def test_abstract_runnable_non_creation():
+    with pytest.raises(NotImplementedError):
+        AbstractRunnable()
+
+
+def test_abstract_runnable_non_execution():
+
+    class NotWorkingRunnable(AbstractRunnable):
+        def __init__(self):
+            pass
+
+        def execute(self):
+            AbstractRunnable.execute(self)
+
+    test_worker = NotWorkingRunnable()
+    with pytest.raises(NotImplementedError):
+        test_worker.execute()

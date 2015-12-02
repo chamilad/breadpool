@@ -14,7 +14,7 @@
 
 from Queue import Queue, Empty
 from threading import Thread, RLock as rLock
-import traceback
+# import traceback
 import logging
 import time
 
@@ -128,8 +128,14 @@ class ScheduledJobExecutor(Thread):
     def run(self):
         # start job
         while not self.__terminated:
+            start_time = time.time()
             with rLock():
-                time.sleep(self.__delay)
+                # sleep for the required duration if lock acquisition took time
+                lock_end_time = time.time()
+                remaining_wait_time = self.__delay - (lock_end_time - start_time)
+                if remaining_wait_time > 0.0:
+                    time.sleep(remaining_wait_time)
+
                 if not self.__terminated:
                     self.__thread_pool.enqueue(self.__task)
 
