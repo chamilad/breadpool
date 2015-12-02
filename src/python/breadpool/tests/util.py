@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import threading
-from ..pool import *
 
 
 def get_threads_with_name(thread_name):
@@ -25,12 +24,3 @@ def get_threads_with_name(thread_name):
 
     return named_threads
 
-
-class TestTask(AbstractRunnable):
-    def execute(self):
-        print "Args %s" % self.args
-        self.task(self.args)
-
-    def __init__(self, task, *args):
-        self.args = args
-        self.task = task

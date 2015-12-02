@@ -19,7 +19,7 @@ import logging
 import time
 
 log = logging.getLogger(__name__)
-log.addHandler(logging.NullHandler)
+log.addHandler(logging.NullHandler())
 
 
 class _WorkerThread(Thread):
@@ -28,8 +28,11 @@ class _WorkerThread(Thread):
         self.__task_queue = task_queue
         """ :type : Queue """
         self.__terminated = False
+        """ :type : bool """
         self.__thread_name = thread_name
+        """ :type : str """
         self.__polling_timeout = polling_timeout
+        """ :type : int """
 
     def run(self):
         while not self.__terminated:
@@ -42,20 +45,20 @@ class _WorkerThread(Thread):
                 pass
 
             if task is not None:
-                log.info("Work!")
-                # print "Work!!"
-                try:
-                    task.execute()
-                except Exception as ex:
-                    log.info("Caught exception while executing task : %s" % ex.message)
-                    # print "Caught exception while executing task : %s" % ex.message
-                    traceback.print_exc()
+                if isinstance(task, AbstractRunnable):
+                    try:
+                        task.execute()
+                    except Exception as ex:
+                        log.info("Caught exception while executing task : %s" % ex.message)
+                        traceback.print_exc()
 
                     # notify the queue that the task is done
-                self.__task_queue.task_done()
+                    self.__task_queue.task_done()
+                else:
+                    # this should not happen!
+                    log.error("Invalid object enqueued to task list.")
 
         log.debug("Terminating worker thread %s" % self.__thread_name)
-        # print "Terminating worker thread %s" % self.__thread_name
 
     def terminate(self):
         self.__terminated = True
@@ -67,14 +70,24 @@ class ThreadPool(object):
             raise ValueError("Thread pool size should be more than 0")
 
         self.__task_queue = Queue()
+        """ :type : Queue """
         self.__pool_size = size
+        """ :type : int """
         self.__pool_name = name
+        """ :type : str """
         self.__worker_threads = []
+        """ :type : list """
         self.__polling_timeout = polling_timeout
+        """ :type : int """
         self.__daemon = daemon
+        """ :type : bool """""
+
         self.create_worker_threads()
 
     def enqueue(self, task):
+        if not isinstance(task, AbstractRunnable):
+            raise ValueError("The task must be of AbstractRunnable or a subclass of it.")
+
         # thread safety comes from Queue class
         self.__task_queue.put(task)
 
@@ -83,10 +96,8 @@ class ThreadPool(object):
 
     def terminate(self):
         log.debug("Waiting until all the tasks are done")
-        # print "Waiting until all the tasks are done"
         self.__task_queue.join()
         log.debug("Sending termination signal for the worker threads")
-        # print "Sending termination signal for the worker threads"
         for worker_thread in self.__worker_threads:
             worker_thread.terminate()
 
@@ -97,10 +108,12 @@ class ThreadPool(object):
             worker_thread.setDaemon(self.__daemon)
             worker_thread.start()
             self.__worker_threads.append(worker_thread)
-            # print "Worker thread created %s" % thread_name
 
 
 class ScheduledJobExecutor(Thread):
+    """
+    A Scheduled executor which periodically executes a given task.
+    """
     def __init__(self, task, thread_pool, delay):
         super(ScheduledJobExecutor, self).__init__()
         self.__task = task
@@ -108,7 +121,9 @@ class ScheduledJobExecutor(Thread):
         self.__thread_pool = thread_pool
         """ :type : ThreadPool  """
         self.__delay = delay
+        """ :type : int """
         self.__terminated = False
+        """ :type : bool """
 
     def run(self):
         # start job
@@ -134,3 +149,20 @@ class AbstractRunnable(object):
 
     def execute(self):
         raise NotImplementedError
+
+
+class EasyTask(AbstractRunnable):
+    """
+    An implementation of the AbstractRunnable class which accepts a function to be executed.
+    """
+    def execute(self):
+        log.debug("Executing [function] %s" % self.function.__name__)
+        self.function(*self.args, **self.kwargs)
+
+    def __init__(self, function, *args, **kwargs):
+        if not hasattr(function, '__call__'):
+            raise ValueError("The task is not a valid function")
+
+        self.function = function
+        self.args = args
+        self.kwargs = kwargs

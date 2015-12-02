@@ -13,9 +13,12 @@
 # limitations under the License.
 
 import pytest
+import logging
+from testfixtures import LogCapture, log_capture
 import datetime
 import time
 from ..pool import *
+from ..pool import _WorkerThread  # 100% coverage
 import util
 
 """
@@ -42,25 +45,6 @@ def test_thread_pool_pool_thread_size():
     thread_pool.terminate()
 
 
-# def test_thread_pool_polling_timeout():
-#     thread_pool = ThreadPool(5, "TestThreadPoolPolling", polling_timeout=5)
-#     while len(util.get_threads_with_name("TestThreadPoolPolling").keys()) < 5:
-#         time.sleep(1)
-#
-#     before_time = datetime.datetime.now()
-#     print before_time.time()
-#     thread_pool.terminate()
-#     while len(util.get_threads_with_name("TestThreadPoolPolling").keys()) > 4:
-#         time.sleep(1)
-#
-#     after_time = datetime.datetime.now()
-#     print after_time.time()
-#     diff_time = after_time - before_time
-#     print diff_time.seconds
-#     # assert False
-#     assert diff_time.seconds == 5
-
-
 def test_thread_pool_daemon_flag():
     thread_pool = ThreadPool(2, "TestThreadPoolDaemonFlag", daemon=True, polling_timeout=1)
     created_threads = util.get_threads_with_name("TestThreadPoolDaemonFlag")
@@ -75,7 +59,7 @@ def test_thread_pool_thread_limitation():
     i = 0
     counter_queue = Queue()
     while i < 10:
-        thread_pool.enqueue(util.TestTask(lambda(l): counter_queue.put(l), "Test%s" % i))
+        thread_pool.enqueue(EasyTask(lambda(l): counter_queue.put(l), "Test%s" % i))
         i += 1
 
     assert len(util.get_threads_with_name("TestThreadPoolLimitation")) == 5
@@ -84,10 +68,35 @@ def test_thread_pool_thread_limitation():
 
 
 def test_scheduled_executor_scheduling():
-    thread_pool = ThreadPool(3, "TestScheduledExcutorScheduling", polling_timeout=1)
+    thread_pool = ThreadPool(3, "TestScheduledExecutorScheduling", polling_timeout=1)
     counter_queue = Queue()
-    scheduled_executor = ScheduledJobExecutor(util.TestTask(lambda(l): counter_queue.put(l), "STest %s" % datetime.datetime.now()), thread_pool, 5)
+    scheduled_executor = ScheduledJobExecutor(EasyTask(lambda(l): counter_queue.put(l), "STest %s" % datetime.datetime.now()), thread_pool, 5)
     scheduled_executor.start()
     time.sleep(27)
     scheduled_executor.terminate()
     assert counter_queue.qsize() == 5
+
+
+def test_easy_task_validation():
+    with pytest.raises(ValueError):
+        EasyTask("dd")
+
+
+def test_thread_pool_task_validation():
+    thread_pool = ThreadPool(1, "TestThreadPoolTaskValidation", daemon=True)
+    with pytest.raises(ValueError):
+        thread_pool.enqueue("dd")
+
+
+@log_capture()
+def test_worker_thread_task_validation(l):
+    test_queue = Queue(maxsize=4)
+    worker_thread = _WorkerThread(test_queue, "TestWorkerThreadTaskValidation", 10)
+    worker_thread.setDaemon(True)
+    worker_thread.start()
+
+    test_queue.put("dd")
+    time.sleep(5)
+    l.check(('breadpool.pool', 'ERROR', 'Invalid object enqueued to task list.'))
+
+    worker_thread.terminate()
