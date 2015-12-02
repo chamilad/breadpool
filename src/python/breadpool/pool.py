@@ -48,9 +48,9 @@ class _WorkerThread(Thread):
                 if isinstance(task, AbstractRunnable):
                     try:
                         task.execute()
-                    except Exception as ex:
-                        log.info("Caught exception while executing task : %s" % ex.message)
-                        traceback.print_exc()
+                    except BaseException as ex:
+                        log.info("Caught exception while executing task : %s: %s" % (ex.__class__.__name__, ex))
+                        # traceback.print_exc()
 
                     # notify the queue that the task is done
                     self.__task_queue.task_done()

@@ -101,3 +101,21 @@ def test_worker_thread_task_validation(l):
     l.check(('breadpool.pool', 'ERROR', 'Invalid object enqueued to task list.'),)
 
     worker_thread.terminate()
+
+
+@log_capture(level=logging.INFO)
+def test_worker_thread_task_execution_exception_handling(lg):
+    thread_pool = ThreadPool(1, "TestWorkThreadTaskException", daemon=True, polling_timeout=10)
+
+    def raising(lll):
+        raise ValueError("Some Exception %s" % lll)
+
+    thread_pool.enqueue(EasyTask(raising, "Exception caught"))
+    time.sleep(3)
+    lg.uninstall()
+    lg.check((
+        'breadpool.pool',
+        'INFO',
+        'Caught exception while executing task : ValueError: Some Exception Exception caught'),)
+
+    thread_pool.terminate()
