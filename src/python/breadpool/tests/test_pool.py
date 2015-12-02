@@ -97,6 +97,6 @@ def test_worker_thread_task_validation(l):
 
     test_queue.put("dd")
     time.sleep(5)
-    l.check(('breadpool.pool', 'ERROR', 'Invalid object enqueued to task list.'))
+    l.check(('breadpool.pool', 'ERROR', 'Invalid object enqueued to task list.'),)
 
     worker_thread.terminate()
