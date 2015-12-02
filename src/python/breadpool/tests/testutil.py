@@ -24,3 +24,8 @@ def get_threads_with_name(thread_name):
 
     return named_threads
 
+
+def print_all_active_threads():
+    live_threads = threading.enumerate()
+    for live_thread in live_threads:
+        print live_thread.name

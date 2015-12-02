@@ -114,7 +114,7 @@ class ScheduledJobExecutor(Thread):
     """
     A Scheduled executor which periodically executes a given task.
     """
-    def __init__(self, task, thread_pool, delay):
+    def __init__(self, task, thread_pool, delay, name):
         super(ScheduledJobExecutor, self).__init__()
         self.__task = task
         """ :type : AbstractRunnable """
@@ -124,6 +124,10 @@ class ScheduledJobExecutor(Thread):
         """ :type : int """
         self.__terminated = False
         """ :type : bool """
+        self.__name = name
+        """ :type : str """
+
+        self.setName(name)
 
     def run(self):
         # start job
