@@ -88,7 +88,7 @@ def test_thread_pool_task_validation():
         thread_pool.enqueue("dd")
 
 
-@log_capture()
+@log_capture(level=logging.ERROR)
 def test_worker_thread_task_validation(l):
     test_queue = Queue(maxsize=4)
     worker_thread = _WorkerThread(test_queue, "TestWorkerThreadTaskValidation", 10)
@@ -97,6 +97,7 @@ def test_worker_thread_task_validation(l):
 
     test_queue.put("dd")
     time.sleep(5)
+    l.uninstall()
     l.check(('breadpool.pool', 'ERROR', 'Invalid object enqueued to task list.'),)
 
     worker_thread.terminate()
