@@ -31,6 +31,9 @@ def test_thread_pool_value_exception():
     with pytest.raises(ValueError):
         ThreadPool(0, "TestThreadPoolValException")
 
+    with pytest.raises(ValueError):
+        ThreadPool(1, "TestThreadPoolValException", polling_timeout=0)
+
 
 def test_thread_pool_value_property():
     thread_pool = ThreadPool(5, "TestThreadPoolValueProperty", polling_timeout=1)
@@ -113,6 +116,24 @@ def test_scheduled_executor_thread_limit():
     testutil.print_all_active_threads()
     assert threading.activeCount() == (5 + 1 + 1)  # worker threads + main thread + scheduled executor thread
     scheduled_executor.terminate()
+
+
+def test_scheduled_executor_exceptions():
+    with pytest.raises(ValueError):
+        ScheduledJobExecutor("dd", "dd", 0, "dd")
+
+    with pytest.raises(ValueError):
+        def func_test():
+            time.sleep(random.randint(1, 5))
+        et = EasyTask(func_test)
+        ScheduledJobExecutor(et, "dd", 0, "dd")
+
+    with pytest.raises(ValueError):
+        def func_test():
+            time.sleep(random.randint(1, 5))
+        et = EasyTask(func_test)
+        thread_pool = ThreadPool(1, "TestScheduledExecutorExceptions", daemon=True)
+        ScheduledJobExecutor(et, thread_pool, 0, "dd")
 
 """
 EasyTask
