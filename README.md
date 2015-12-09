@@ -86,5 +86,5 @@ scheduled_executor.terminate()
 BreadPool supports only Python 2.7 (for now).
 
 # License
-BreadPool is an Apache v2.0 license project. 
+BreadPool is an Apache v2.0 licensed project. 
 
