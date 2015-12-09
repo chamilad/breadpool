@@ -92,22 +92,25 @@ class ThreadPool(object):
         self.__task_queue.put(task)
 
     def get_pool_size(self):
-        return self.__pool_size
+        with rLock():
+            return self.__pool_size
 
     def terminate(self):
-        log.debug("Waiting until all the tasks are done")
-        self.__task_queue.join()
-        log.debug("Sending termination signal for the worker threads")
-        for worker_thread in self.__worker_threads:
-            worker_thread.terminate()
+        with rLock():
+            log.debug("Waiting until all the tasks are done")
+            self.__task_queue.join()
+            log.debug("Sending termination signal for the worker threads")
+            for worker_thread in self.__worker_threads:
+                worker_thread.terminate()
 
     def create_worker_threads(self):
-        while len(self.__worker_threads) < self.__pool_size:
-            thread_name = "%s-%s" % (self.__pool_name, (len(self.__worker_threads) + 1))
-            worker_thread = _WorkerThread(self.__task_queue, thread_name, self.__polling_timeout)
-            worker_thread.setDaemon(self.__daemon)
-            worker_thread.start()
-            self.__worker_threads.append(worker_thread)
+        with rLock():
+            while len(self.__worker_threads) < self.__pool_size:
+                thread_name = "%s-%s" % (self.__pool_name, (len(self.__worker_threads) + 1))
+                worker_thread = _WorkerThread(self.__task_queue, thread_name, self.__polling_timeout)
+                worker_thread.setDaemon(self.__daemon)
+                worker_thread.start()
+                self.__worker_threads.append(worker_thread)
 
 
 class ScheduledJobExecutor(Thread):
@@ -135,13 +138,14 @@ class ScheduledJobExecutor(Thread):
             start_time = time.time()
             with rLock():
                 # sleep for the required duration if lock acquisition took time
-                lock_end_time = time.time()
-                remaining_wait_time = self.__delay - (lock_end_time - start_time)
-                if remaining_wait_time > 0.0:
-                    time.sleep(remaining_wait_time)
-
                 if not self.__terminated:
-                    self.__thread_pool.enqueue(self.__task)
+                    lock_end_time = time.time()
+                    remaining_wait_time = self.__delay - (lock_end_time - start_time)
+                    if remaining_wait_time > 0.0:
+                        time.sleep(remaining_wait_time)
+
+                    if not self.__terminated:
+                        self.__thread_pool.enqueue(self.__task)
 
     def terminate(self):
         with rLock():
