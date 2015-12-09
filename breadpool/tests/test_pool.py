@@ -16,7 +16,6 @@ import pytest
 import logging
 from testfixtures import log_capture
 import random
-import time
 import threading
 
 from ..pool import *

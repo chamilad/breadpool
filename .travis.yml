@@ -6,5 +6,5 @@ install: "pip install -r requirements.txt"
 # command to run tests
 script: py.test --cov breadpool --cov-report term-missing
 after_success:
-  - mv src/python/breadpool/.coverage .
+  - mv breadpool/.coverage .
   - coveralls
