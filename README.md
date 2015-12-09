@@ -2,7 +2,8 @@
 
 [![Coverage Status](https://coveralls.io/repos/chamilad/breadpool/badge.svg?branch=master&service=github?dd=gg)](https://coveralls.io/github/chamilad/breadpool?branch=master)
 
-# BreadPool - A Python Thread Pool and a Scheduled Executor
+# BreadPool 
+##A Python Thread Pool and a Scheduled Executor
 
 BreadPool intends to simply provide implementations for a thread pool and a scheduled executor, with
 easy to use interfaces and thread safety. Yes, it is a simple code to write your own implementations
@@ -82,9 +83,9 @@ scheduled_executor.start()
 scheduled_executor.terminate()
 ```
 
-# Python Support
+## Python Support
 BreadPool supports only Python 2.7 (for now).
 
-# License
+## License
 BreadPool is an Apache v2.0 licensed project. 
 

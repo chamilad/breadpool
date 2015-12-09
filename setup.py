@@ -23,7 +23,7 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(name='breadpool',
-      version='0.0.2',
+      version='0.0.3',
       description='A Python Thread Pool and a Scheduled Executor',
       url='https://github.com/chamilad/breadpool',
       author='Chamila de Alwis',
