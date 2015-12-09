@@ -89,3 +89,8 @@ BreadPool supports only Python 2.7 (for now).
 ## License
 BreadPool is an Apache v2.0 licensed project. 
 
+## Additional Links
+
+1. ReadTheDocs - http://pythonhosted.org/breadpool/breadpool.html
+2. PyPI - https://pypi.python.org/pypi/breadpool
+
