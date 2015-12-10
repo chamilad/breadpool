@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/chamilad/breadpool.svg?branch=master)](https://travis-ci.org/chamilad/breadpool) 
 [![Coverage Status](https://coveralls.io/repos/chamilad/breadpool/badge.svg?branch=master&service=github?dd=gg)](https://coveralls.io/github/chamilad/breadpool?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/breadpool/badge/?version=latest)](http://breadpool.readthedocs.org/en/latest/?badge=latest)
-
+[![PyPI version](https://badge.fury.io/py/breadpool.svg)](https://badge.fury.io/py/breadpool)
 
 # BreadPool 
 ##A Python Thread Pool and a Scheduled Executor
