@@ -18,7 +18,7 @@ easy to use interfaces and thread safety. Yes, it is a simple code to write your
 for these, however it can be a lot easier if they come in a `pip install`.
 """
 
-from Queue import Queue, Empty
+from queue import Queue, Empty
 from threading import Thread, RLock as rLock
 # import traceback
 import logging
